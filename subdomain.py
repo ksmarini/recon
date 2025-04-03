@@ -21,6 +21,39 @@ scanner = "assetfinder"
 dic_assetfinder = {}
 
 
+def busca_dados():
+    target = sys.argv[1]
+    index_name = f"{target}-subdomain"
+
+    # Consulta que retorna todos os documentos
+    search_body = {
+        "query": {
+            "match_all": {}  # Consulta genérica
+        },
+        "size": 1000,  # Ajuste conforme necessário
+    }
+
+    try:
+        response = client.search(index=index_name, body=search_body)
+        hits = response["hits"]["hits"]
+
+        if not hits:
+            print("Nenhum dado encontrado no índice.")
+            return
+
+        print(f"\nTotal de {len(hits)} subdomínios encontrados:")
+        for hit in hits:
+            source = hit["_source"]
+            print(f"""
+            Subdomínio: {source["server.domain"]}
+            IP: {source["server.ip"]}
+            Data: {source["@timestamp"]}
+            """)
+
+    except Exception as e:
+        print(f"Erro na consulta: {e}")
+
+
 def post_dados():
     target = sys.argv[1]
     index_name = f"{target}-subdomain"
@@ -33,7 +66,7 @@ def post_dados():
             try:
                 dic_assetfinder["server.ip"] = socket.gethostbyname(line.rstrip("\n"))
             except:
-                dic_assetfinder["server.ip"] = "0.0.0.0"
+                dic_assetfinder["server.ip"] = ""
             dic_assetfinder["vulnerability.scanner.vendor"] = scanner
 
             document = {
@@ -55,7 +88,8 @@ def post_dados():
 
 
 def main():
-    post_dados()
+    # post_dados()
+    busca_dados()
 
 
 if __name__ == "__main__":

@@ -17,13 +17,12 @@ client = get_opensearch_client()
 
 target = sys.argv[1]
 domain = sys.argv[2]
-scanner = "assetfinder"
-dic_assetfinder = {}
+dic_sublist3r = {}
 hora = strftime("%Y-%m-%dT%H:%M:%S%Z")
-scanner = "assetfinder"
+scanner = "sublist3r"
 x = str(uuid.uuid1()).split("-")[0]
-container_name = target + "-" + x + "-assetfinder"
-saida = "assetfinder-" + x + ".txt"
+container_name = target + "-" + x + "-sublist3r"
+saida = "sublist3r-" + x + ".txt"
 
 
 def criar_diretorios(target: str) -> None:
@@ -77,16 +76,15 @@ def executa():
         + " -v /docker/recon/data/"
         + target
         + "/temp:/data"
-        + " kali-tools:2.1 assetfinder -subs-only "
+        + " kali-tools:2.1 /scripts/Sublist3r/sublist3r.py"
+        + " -d "
         + domain
-        + " >> /docker/recon/data/"
-        + target
-        + "/temp/"
+        + " -o /data/"
         + saida
         + " || true"
     )
 
-    # print(f"Executando comando:\n{comando}")
+    print(f"Executando comando:\n{comando}")
     subprocess.check_output(comando, shell=True)
 
 
@@ -94,27 +92,27 @@ def parse():
     index_name = target
     with open("/docker/recon/data/" + target + "/temp/" + saida) as file:
         for line in file:
-            dic_assetfinder["timestamp"] = hora
-            dic_assetfinder["server.address"] = line.rstrip("\n")
-            dic_assetfinder["server.domain"] = line.rstrip("\n")
+            dic_sublist3r["timestamp"] = hora
+            dic_sublist3r["server.address"] = line.rstrip("\n")
+            dic_sublist3r["server.domain"] = line.rstrip("\n")
             try:
-                dic_assetfinder["server.ip"] = socket.gethostbyname(line.rstrip("\n"))
+                dic_sublist3r["server.ip"] = socket.gethostbyname(line.rstrip("\n"))
             except:
-                dic_assetfinder["server.ip"] = "0.0.0.0"
-            dic_assetfinder["vulnerability.scanner.vendor"] = scanner
-            dic_assetfinder["server.ipblock"] = rdap_ip(dic_assetfinder["server.ip"])
-            dic_assetfinder["server.nameserver"] = rdap_domain(
-                dic_assetfinder["server.domain"]
+                dic_sublist3r["server.ip"] = "0.0.0.0"
+            dic_sublist3r["vulnerability.scanner.vendor"] = scanner
+            dic_sublist3r["server.ipblock"] = rdap_ip(dic_sublist3r["server.ip"])
+            dic_sublist3r["server.nameserver"] = rdap_domain(
+                dic_sublist3r["server.domain"]
             )
 
             document = {
-                "@timestamp": dic_assetfinder["timestamp"],
-                "server.address": dic_assetfinder["server.address"],
-                "server.domain": dic_assetfinder["server.domain"],
-                "server.ip": dic_assetfinder["server.ip"],
-                "server.ipblock": dic_assetfinder["server.ipblock"],
-                "server.nameserver": dic_assetfinder["server.nameserver"],
-                "vulnerability.scanner.vendor": dic_assetfinder[
+                "@timestamp": dic_sublist3r["timestamp"],
+                "server.address": dic_sublist3r["server.address"],
+                "server.domain": dic_sublist3r["server.domain"],
+                "server.ip": dic_sublist3r["server.ip"],
+                "server.ipblock": dic_sublist3r["server.ipblock"],
+                "server.nameserver": dic_sublist3r["server.nameserver"],
+                "vulnerability.scanner.vendor": dic_sublist3r[
                     "vulnerability.scanner.vendor"
                 ],
             }

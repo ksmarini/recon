@@ -8,20 +8,12 @@ import uuid
 import json
 from pathlib import Path
 from time import strftime
-from opensearchpy import OpenSearch
+from conn.database import get_opensearch_client
 
 host = "localhost"
 port = 9200
 
-# Create the client with SSL/TLS and hostname verification disabled.
-client = OpenSearch(
-    hosts=[{"host": host, "port": port}],
-    http_compress=True,  # enables gzip compression for request bodies
-    use_ssl=False,
-    verify_certs=False,
-    ssl_assert_hostname=False,
-    ssl_show_warn=False,
-)
+client = get_opensearch_client()
 
 target = sys.argv[1]
 domain = sys.argv[2]

@@ -17,7 +17,6 @@ client = get_opensearch_client()
 
 target = sys.argv[1]
 domain = sys.argv[2]
-scanner = "assetfinder"
 dic_assetfinder = {}
 hora = strftime("%Y-%m-%dT%H:%M:%S%Z")
 scanner = "assetfinder"
